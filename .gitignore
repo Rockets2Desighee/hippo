@@ -1,0 +1,81 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+*.so
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+env.bak/
+pip-wheel-metadata/
+*.egg-info/
+.eggs/
+
+# OS junk (macOS)
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+.fseventsd
+Icon?
+ehthumbs.db
+Thumbs.db
+
+# Build & packaging
+build/
+dist/
+.wheelhouse/
+*.egg
+MANIFEST
+
+# Testing & coverage
+.coverage
+.tox/
+.pytest_cache/
+htmlcov/
+
+# Jupyter notebooks
+.ipynb_checkpoints
+
+# MyPy / Type checking
+.mypy_cache/
+.dmypy.json
+.pyre/
+
+# VS Code / IDE junk
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+*.bak
+*.tmp
+
+# Project-specific
+# Entire data directory (downloaded imagery, temporary outputs)
+data/
+
+# Large raster & SAFE files (anywhere in repo)
+*.tif
+*.tiff
+*.jp2
+*.SAFE/
+
+# Quicklook images
+quicklook.png
+*.png
+
+# Logs
+*.log
+
+# Local config & secrets
+.env
+.env.*
+!env.example
