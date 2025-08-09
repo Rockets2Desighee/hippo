@@ -1,0 +1,62 @@
+.
+├── env.example
+├── project.toml
+├── requirements.txt
+├── sat_ingest
+│   ├── __init__.py
+│   ├── adapters
+│   │   ├── __init__.py
+│   │   ├── noaa_goes
+│   │   │   ├── __init__.py
+│   │   │   └── client.py
+│   │   └── stac_generic
+│   │       ├── __init__.py
+│   │       ├── client.py
+│   │       └── mapper.py
+│   ├── cli
+│   │   ├── __init__.py
+│   │   ├── __main__.py
+│   │   └── commands
+│   │       ├── __init__.py
+│   │       ├── download.py
+│   │       ├── quicklook.py
+│   │       └── search.py
+│   ├── core
+│   │   ├── __init__.py
+│   │   ├── adapter_registry.py
+│   │   ├── adapters
+│   │   │   ├── __init__.py
+│   │   │   └── base.py
+│   │   ├── auth.py
+│   │   ├── geometry.py
+│   │   ├── http.py
+│   │   ├── models.py
+│   │   ├── paginate.py
+│   │   ├── search.py
+│   │   ├── storage
+│   │   │   ├── __init__.py
+│   │   │   ├── base.py
+│   │   │   └── local.py
+│   │   ├── support_matrix.py
+│   │   ├── telemetry.py
+│   │   └── utils.py
+│   └── utils
+│       ├── __init__.py
+│       └── geometry.py
+├── structure.txt
+├── test_aoi_big
+│   ├── aoi.dbf
+│   ├── aoi.geojson
+│   ├── aoi.prj
+│   ├── aoi.shp
+│   └── aoi.shx
+└── tests
+    ├── __init__.py
+    ├── contract
+    │   ├── __init__.py
+    │   └── test_adapter_contract.py
+    └── fixtures
+        ├── __init__.py
+        └── sample_aoi.geojson
+
+15 directories, 45 files
