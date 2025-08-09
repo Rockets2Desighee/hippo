@@ -1,4 +1,4 @@
-# Current Capacity: Sentinel2 from Earth-Search (Element84) + NOAA GOES
+# Current Capacity: S2 from Earth-Search (Element84) + CDSE_STAC + NOAA GOES
 
 ## Quick start
 ```bash
