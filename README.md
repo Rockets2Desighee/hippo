@@ -1,4 +1,4 @@
-# Currently just the skeleton
+# Current Capacity: Sentinel2 from Earth-Search (Element84) + NOAA GOES
 
 ## Quick start
 ```bash
