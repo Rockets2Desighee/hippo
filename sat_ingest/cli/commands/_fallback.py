@@ -148,3 +148,85 @@ def run_with_fallback(primary_adapter, func, func_kwargs,
     raise click.ClickException(
         "All adapters failed:\n" + "\n".join(f"{a}: {err}" for a, err in errors)
     )
+
+
+
+
+
+
+#####################################
+# support S1, S2, S3, S5P, Landsat, and GOES in the same fallback system
+#####################################
+
+# from __future__ import annotations
+# import click
+# import inspect
+# from typing import Any, Union
+# from sat_ingest.adapter_registry import build_adapter
+# from sat_ingest.support_matrix import SupportMatrix
+
+# def run_with_fallback(
+#     initial_source: str,
+#     params: Union[Any, str],
+#     fallback_order: str | None,
+#     auto_fallback: bool,
+#     op_name: str,
+#     op_kwargs: dict | None = None
+# ):
+#     """
+#     Runs an operation (search, download, quicklook) with fallback logic.
+#     `params` may be a SearchParams or a path string (for quicklook).
+#     """
+#     op_kwargs = op_kwargs or {}
+
+#     if fallback_order:
+#         fallbacks = [s.strip() for s in fallback_order.split(",") if s.strip()]
+#     else:
+#         if hasattr(params, "collections"):  # SearchParams
+#             sat = getattr(params, "satellite", None)
+#             prod = getattr(params, "product", None)
+#         else:
+#             sat = None
+#             prod = None
+#         fallbacks = SupportMatrix().get_fallbacks(sat or "", prod)
+
+#     tried = {}
+#     current_source = initial_source
+#     if not current_source:
+#         current_source = fallbacks[0] if fallbacks else None
+
+#     for adapter_name in [current_source] + [f for f in fallbacks if f != current_source]:
+#         click.echo(f"[adapter] {adapter_name}")
+#         try:
+#             adapter = build_adapter(adapter_name)
+#             if not hasattr(adapter, op_name):
+#                 raise ValueError(f"Adapter '{adapter_name}' does not implement {op_name}()")
+
+#             method = getattr(adapter, op_name)
+#             sig = inspect.signature(method)
+#             if "params" in sig.parameters:
+#                 method(params, **op_kwargs)
+#             else:
+#                 method(**({"params": params} | op_kwargs))
+#             return  # success → stop fallback chain
+#         except Exception as e:
+#             tried[adapter_name] = str(e)
+#             if auto_fallback:
+#                 continue
+#             else:
+#                 remaining = [f for f in fallbacks if f not in tried]
+#                 if not remaining:
+#                     break
+#                 click.echo("Remaining fallbacks:")
+#                 for idx, rem in enumerate(remaining, 1):
+#                     click.echo(f"  {idx}. {rem}")
+#                 choice = click.prompt(
+#                     "Pick fallback number (or 0 to abort)", type=int, default=1
+#                 )
+#                 if choice == 0:
+#                     break
+#                 current_source = remaining[choice - 1]
+
+#     click.echo("Error: All adapters failed:")
+#     for name, err in tried.items():
+#         click.echo(f"{name}: {err}")

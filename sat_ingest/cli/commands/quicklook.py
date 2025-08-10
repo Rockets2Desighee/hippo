@@ -247,7 +247,7 @@
 
 ###########################
 ###########################
-# THIS WORKS FOR GENERIC_STAC + CDSE STAC + NOAA
+# THIS WORKS FOR GENERIC_STAC + CDSE STAC + NOAA: 10 AUGUST
 
 from pathlib import Path
 from typing import Optional, Sequence
@@ -349,3 +349,85 @@ def quicklook_cmd(item_dir: Path, out: Optional[Path], assets: str, size: int, c
         fallback_order=[f.strip() for f in fallback_order.split(",")] if fallback_order else None,
         auto_fallback=auto_fallback
     )
+
+
+
+
+#####################################
+# support S1, S2, S3, S5P, Landsat, and GOES in the same fallback system
+#####################################
+
+# import click
+# from sat_ingest.core.support_matrix import SupportMatrix
+# from ._fallback import run_with_fallback
+
+# BAND_ALIASES = {
+#     "red": ["B04", "red"],
+#     "green": ["B03", "green"],
+#     "blue": ["B02", "blue"]
+# }
+
+# @click.command()
+# @click.argument("item_dir")
+# @click.option("--assets")
+# @click.option("--source")
+# @click.option("--fallback-order")
+# @click.option("--auto-fallback", is_flag=True, default=False)
+# def quicklook_cmd(item_dir, assets, source, fallback_order, auto_fallback):
+#     asset_keys = None
+#     if assets:
+#         requested = [a.strip() for a in assets.split(",")]
+#         resolved = []
+#         for band in requested:
+#             resolved.extend(BAND_ALIASES.get(band, [band]))
+#         asset_keys = resolved
+
+#     run_with_fallback(
+#         initial_source=source,
+#         params=item_dir,
+#         fallback_order=fallback_order,
+#         auto_fallback=auto_fallback,
+#         op_name="quicklook",
+#         op_kwargs={"asset_keys": asset_keys}
+#     )
+
+
+
+
+#################################
+# THIS WORKS FOR ALL ADAPTERS AND SATELLITES
+# WITH PLACEHOLDERS FOR FURTHER ADAPTERS
+#################################
+
+# # sat_ingest/cli/commands/quicklook.py
+# import click
+# from ._fallback import run_with_fallback
+
+# BAND_ALIASES = {
+#     "red": ["B04", "B4", "red", "red.tif"],
+#     "green": ["B03", "B3", "green", "green.tif"],
+#     "blue": ["B02", "B2", "blue", "blue.tif"],
+# }
+
+# @click.command("quicklook")
+# @click.argument("item_dir")
+# @click.option("--assets", help="Comma-separated list of asset names")
+# @click.option("--source", help="Preferred data source adapter")
+# @click.option("--fallback-order", help="Comma-separated list of adapters to try in order")
+# @click.option("--auto-fallback", is_flag=True)
+# def quicklook_cmd(item_dir, assets, source, fallback_order, auto_fallback):
+#     """Generate quicklook PNG from item directory with fallback."""
+#     if assets:
+#         assets_list = []
+#         for asset in assets.split(","):
+#             asset = asset.strip().lower()
+#             assets_list.append(BAND_ALIASES.get(asset, [asset]))
+#     else:
+#         assets_list = None
+
+#     def run_quicklook(adapter_client):
+#         return adapter_client.quicklook(item_dir=item_dir, assets=assets_list)
+
+#     run_with_fallback(
+#         None, None, source, fallback_order, auto_fallback, run_quicklook
+#     )

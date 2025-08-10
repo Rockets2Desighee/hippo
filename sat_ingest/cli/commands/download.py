@@ -81,15 +81,174 @@
 
 
 
+#####################################
+# support S1, S2, S3, S5P, Landsat, and GOES in the same fallback system
+#####################################
+
+# import click
+# from shapely.geometry import mapping
+# from rasterio.warp import transform_geom
+# from sat_ingest.core.search import SearchParams
+# from sat_ingest.core.support_matrix import SupportMatrix
+# from sat_ingest.utils.geometry import load_aoi_geometry
+# from ._fallback import run_with_fallback
+
+# BAND_ALIASES = {
+#     "red": ["B04", "red"],
+#     "green": ["B03", "green"],
+#     "blue": ["B02", "blue"]
+# }
+
+# @click.command()
+# @click.option("--collections", multiple=True)
+# @click.option("--satellite")
+# @click.option("--product")
+# @click.option("--source")
+# @click.option("--fallback-order")
+# @click.option("--auto-fallback", is_flag=True, default=False)
+# @click.option("--time", required=True)
+# @click.option("--bbox")
+# @click.option("--aoi")
+# @click.option("--limit", type=int, default=1)
+# @click.option("--assets")
+# @click.option("--prefer-jp2", is_flag=True, default=False)
+# @click.option("--prefer-cog", is_flag=True, default=False)
+# @click.option("--data-root")
+# @click.option("--explain", is_flag=True)
+# def download_cmd(collections, satellite, product, source, fallback_order, auto_fallback,
+#                  time, bbox, aoi, limit, assets, prefer_jp2, prefer_cog, data_root, explain):
+#     chosen_collections = None
+#     reason = None
+#     if source:
+#         adapter_name = source
+#         reason = "source explicitly provided via --source"
+#     elif satellite:
+#         choice = SupportMatrix().resolve(satellite, product)
+#         adapter_name = choice.adapter
+#         reason = choice.reason
+#         chosen_collections = list(choice.collections) if choice.collections else None
+#     else:
+#         adapter_name = "stac_generic"
+#         reason = "defaulted to STAC"
+
+#     if explain:
+#         click.echo({"adapter": adapter_name, "reason": reason})
+
+#     effective_collections = list(collections) or chosen_collections
+
+#     bbox_list = [float(x) for x in bbox.split(",")] if bbox else None
+#     intersects = None
+#     if aoi:
+#         geom, crs = load_aoi_geometry(aoi)
+#         intersects = transform_geom(crs.to_string(), "EPSG:4326", mapping(geom))
+
+#     # Per-band alias resolution
+#     asset_keys = None
+#     if assets:
+#         requested = [a.strip() for a in assets.split(",")]
+#         resolved = []
+#         for band in requested:
+#             resolved.extend(BAND_ALIASES.get(band, [band]))
+#         asset_keys = resolved
+
+#     params = SearchParams(
+#         collections=effective_collections,
+#         time=time,
+#         bbox=bbox_list,
+#         intersects=intersects,
+#         limit=limit
+#     )
+
+#     run_with_fallback(
+#         initial_source=adapter_name,
+#         params=params,
+#         fallback_order=fallback_order,
+#         auto_fallback=auto_fallback,
+#         op_name="download",
+#         op_kwargs={
+#             "asset_keys": asset_keys,
+#             "prefer_jp2": prefer_jp2,
+#             "prefer_cog": prefer_cog,
+#             "data_root": data_root
+#         }
+#     )
+
+
+
+##########################################
+
+# THIS WORKS FOR ALL ADAPTERS AND SATELLITES
+# WITH PLACEHOLDERS
+
+###########################################
+
+
+# # sat_ingest/cli/commands/download.py
+# import click
+# from ._fallback import run_with_fallback
+
+# BAND_ALIASES = {
+#     "red": ["B04", "B4", "red"],
+#     "green": ["B03", "B3", "green"],
+#     "blue": ["B02", "B2", "blue"],
+# }
+
+# @click.command("download")
+# @click.option("--satellite", required=True)
+# @click.option("--product", required=True)
+# @click.option("--source", help="Preferred data source adapter")
+# @click.option("--fallback-order", help="Comma-separated list of adapters to try in order")
+# @click.option("--auto-fallback", is_flag=True)
+# @click.option("--time")
+# @click.option("--limit", type=int)
+# @click.option("--aoi")
+# @click.option("--assets", help="Comma-separated list of asset names")
+# @click.option("--prefer-cog", is_flag=True)
+# def download_cmd(satellite, product, source, fallback_order, auto_fallback, time, limit, aoi, assets, prefer_cog):
+#     """Download assets with per-band alias mapping and fallback."""
+#     if assets:
+#         assets_list = []
+#         for asset in assets.split(","):
+#             asset = asset.strip().lower()
+#             assets_list.append(BAND_ALIASES.get(asset, [asset]))
+#     else:
+#         assets_list = None
+
+#     def run_download(adapter_client):
+#         return adapter_client.download(
+#             satellite=satellite,
+#             product=product,
+#             time=time,
+#             limit=limit,
+#             aoi=aoi,
+#             assets=assets_list,
+#             prefer_cog=prefer_cog
+#         )
+
+#     run_with_fallback(
+#         satellite, product, source, fallback_order, auto_fallback, run_download
+#     )
 
 
 
 
 
 
-############################
+
+
+
+
+
+
+
+
+
+
+
+
 ############################
 # THIS IS FOR CDSE STAC
+############################
 
 
 import click
