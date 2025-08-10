@@ -282,11 +282,114 @@
 #############################
 
 
+# import click
+# import json
+# from shapely.geometry import mapping
+# from sat_ingest.core.search import SearchParams
+# from sat_ingest.core.support_matrix import SupportMatrix
+# from sat_ingest.utils.geometry import load_aoi_geometry
+# from ._fallback import run_with_fallback
+
+# _COLLECTION_HINTS = {
+#     ("sentinel-2", "L2A"): ["sentinel-2-l2a"],
+#     ("landsat-8",  "L2"):  ["landsat-c2-l2"],
+#     ("landsat-9",  "L2"):  ["landsat-c2-l2"],
+# }
+
+# def _maybe_infer_collections(satellite, product):
+#     if not satellite:
+#         return None
+#     key = (satellite.lower(), product.upper() if product else None)
+#     return _COLLECTION_HINTS.get(key)
+
+# @click.command()
+# @click.option("--collections", multiple=True)
+# @click.option("--satellite")
+# @click.option("--product")
+# @click.option("--source")
+# @click.option("--time")
+# @click.option("--bbox")
+# @click.option("--limit", type=int, default=10)
+# @click.option("--aoi")
+# @click.option("--explain", is_flag=True)
+# @click.option("--fallback-order", help="Comma-separated list of adapters to try on failure.")
+# @click.option("--auto-fallback", is_flag=True, help="Skip prompts and try next automatically.")
+# def search_cmd(collections, satellite, product, source, time, bbox, limit, aoi, explain,
+#                fallback_order, auto_fallback):
+
+#     if source:
+#         adapter_name = source
+#         reason = "source explicitly provided via --source"
+#     elif satellite:
+#         choice = SupportMatrix().resolve(satellite, product)
+#         adapter_name = choice.adapter
+#         reason = choice.reason
+#     else:
+#         adapter_name = "stac_generic"
+#         reason = "defaulted to STAC"
+
+#     collections_list = list(collections) or None
+#     if adapter_name == "stac_generic" and not collections_list:
+#         inferred = _maybe_infer_collections(satellite, product)
+#         if inferred:
+#             collections_list = inferred
+
+#     if explain:
+#         click.echo(json.dumps({
+#             "adapter": adapter_name,
+#             "reason": reason,
+#             "satellite": satellite,
+#             "product": product,
+#             "collections": collections_list,
+#         }))
+
+#     bbox_list = [float(x) for x in bbox.split(",")] if bbox else None
+#     intersects = None
+#     if aoi:
+#         geom, crs = load_aoi_geometry(aoi)
+#         from rasterio.warp import transform_geom
+#         intersects = transform_geom(crs.to_string(), "EPSG:4326", mapping(geom))
+
+#     params = SearchParams(
+#         collections=collections_list,
+#         time=time,
+#         bbox=bbox_list,
+#         intersects=intersects,
+#         limit=limit,
+#     )
+
+#     def _runner(adapter, params):
+#         for item in adapter.search(params):
+#             click.echo(json.dumps({
+#                 "id": item.id,
+#                 "collection": item.collection,
+#                 "datetime": item.datetime,
+#             }))
+
+#     run_with_fallback(
+#         primary_adapter=adapter_name,
+#         func=_runner,
+#         func_kwargs={"params": params},
+#         satellite=satellite,
+#         product=product,
+#         fallback_order=[f.strip() for f in fallback_order.split(",")] if fallback_order else None,
+#         auto_fallback=auto_fallback
+#     )
+
+
+
+
+
+
+# ##########################################
+# ##### ONE FINAL TRY
+
+# sat_ingest/search.py
 import click
 import json
 from shapely.geometry import mapping
 from sat_ingest.core.search import SearchParams
-from sat_ingest.core.support_matrix import SupportMatrix
+from sat_ingest.core.support_matrix import get_primary
 from sat_ingest.utils.geometry import load_aoi_geometry
 from ._fallback import run_with_fallback
 
@@ -321,14 +424,17 @@ def search_cmd(collections, satellite, product, source, time, bbox, limit, aoi, 
         adapter_name = source
         reason = "source explicitly provided via --source"
     elif satellite:
-        choice = SupportMatrix().resolve(satellite, product)
-        adapter_name = choice.adapter
-        reason = choice.reason
+        choice = get_primary(satellite, product)
+        if not choice:
+            raise click.ClickException(f"No primary adapter found for {satellite}/{product}")
+        adapter_name, collections_list = choice
+        reason = "from support matrix"
     else:
         adapter_name = "stac_generic"
         reason = "defaulted to STAC"
+        collections_list = None
 
-    collections_list = list(collections) or None
+    collections_list = list(collections) or collections_list
     if adapter_name == "stac_generic" and not collections_list:
         inferred = _maybe_infer_collections(satellite, product)
         if inferred:
