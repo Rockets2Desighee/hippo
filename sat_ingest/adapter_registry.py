@@ -127,7 +127,7 @@ except ImportError:
 
 # Placeholder imports
 from sat_ingest.adapters.aws_open_data.client import AwsOpenDataAdapter
-from sat_ingest.adapters.gee.client import GEEAdapter
+from sat_ingest.adapters.gee.client import GeeAdapter
 from sat_ingest.adapters.eumetsat_coda.client import EumetsatCodaAdapter
 from sat_ingest.adapters.usgs_ee.client import UsgsEarthExplorerAdapter
 from sat_ingest.adapters.podaac.client import PodaacAdapter
@@ -153,7 +153,7 @@ REGISTRY = {
     "cdse_stac": CdseStacAdapter,
     "noaa_goes": NoaaGoesAdapter,
     "aws_open_data": AwsOpenDataAdapter,
-    "gee": GEEAdapter,
+    "gee": GeeAdapter,
     "eumetsat_coda": EumetsatCodaAdapter,
     "usgs_ee": UsgsEarthExplorerAdapter,
     "podaac": PodaacAdapter,

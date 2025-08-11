@@ -1,7 +1,7 @@
 # sat_ingest/adapters/cdse_stac/client.py
 from __future__ import annotations
 from typing import Iterable, Optional, Sequence, Dict, List
-import os, sys, tempfile
+import os, sys, tempfile, json
 from urllib.parse import urlparse
 
 from sat_ingest.core.adapters.base import CatalogAdapter
@@ -18,14 +18,11 @@ CDSE_STAC_URL = os.environ.get(
     "https://catalogue.dataspace.copernicus.eu/stac"
 )
 
-# CDSE items commonly expose Sentinel-2 bands under B02/3/4, sometimes "visual".
-# Map our UX-friendly keys to real asset keys found on the item.
+# Asset alias mapping for convenience keys
 ALIAS_MAP: dict[str, list[str]] = {
-    # RGB convenience → raw S2 band IDs
     "red":   ["B04", "b04", "visual", "red"],
     "green": ["B03", "b03", "visual", "green"],
     "blue":  ["B02", "b02", "visual", "blue"],
-    # Still accept band IDs directly
     "B04": ["B04", "red", "visual"],
     "B03": ["B03", "green", "visual"],
     "B02": ["B02", "blue", "visual"],
@@ -37,17 +34,16 @@ def _extract_next_href(links: List[dict]) -> Optional[str]:
             return l["href"]
     return None
 
+
 class CdseStacAdapter(CatalogAdapter):
     name = "CDSE STAC"
 
     def __init__(self, base_url: str | None = None, data_root: str | None = None):
         self.base_url = (base_url or CDSE_STAC_URL).rstrip("/")
         self.tokens = TokenProvider()
-        # Attach bearer on all requests (search, item, and asset GET if needed)
         self.http = HttpClient(headers={"Authorization": f"Bearer {self.tokens.get_access_token()}"})
         self.sink = LocalSink(root=data_root)
 
-    # ------------ helpers ------------
     def _resolve_asset_key(self, item: Item, requested: str) -> Optional[str]:
         cands = [requested, requested.lower()]
         cands += ALIAS_MAP.get(requested.upper(), [])
@@ -59,47 +55,80 @@ class CdseStacAdapter(CatalogAdapter):
 
     def _guess_ext(self, asset: Asset) -> str:
         mt = (asset.media_type or "").lower()
-        if "geotiff" in mt or "tiff" in mt: return ".tif"
-        if "jp2" in mt or "jpeg2000" in mt: return ".jp2"
+        if "geotiff" in mt or "tiff" in mt:
+            return ".tif"
+        if "jp2" in mt or "jpeg2000" in mt:
+            return ".jp2"
         from os.path import splitext
         _, ext = splitext(urlparse(asset.href).path)
         return ext or ""
 
-    # ------------ public API ------------
     def search(self, params: SearchParams) -> Iterable[Item]:
         url = f"{self.base_url}/search"
-        payload = params.to_stac_payload()
+        payload = {k: v for k, v in params.to_stac_payload().items()
+                   if v not in (None, [], {}, '')}
+
+        # CDSE requires certain fields
+        if not payload.get("collections"):
+            raise ValueError("CDSE STAC search requires at least one collection.")
+        if not (payload.get("intersects") or payload.get("bbox")):
+            raise ValueError("CDSE STAC search requires either 'intersects' or 'bbox'.")
+        if "limit" not in payload:
+            payload["limit"] = 100
+
+        print(f"[cdse_stac] POST {url}")
+        print(f"[cdse_stac] Payload:\n{json.dumps(payload, indent=2)}")
+
+        resp = self.http.post(url, json=payload)
+        if resp.status_code >= 400:
+            try:
+                print("[cdse_stac] Error details from CDSE:\n",
+                      json.dumps(resp.json(), indent=2))
+            except Exception:
+                print("[cdse_stac] Error details from CDSE (raw):", resp.text)
+            raise RuntimeError(
+                f"CDSE STAC search failed: {resp.status_code} {resp.reason}"
+            )
+
+        data = resp.json()
         remaining = payload.get("limit")
 
-        resp = self.http.post(url, json=payload).json()
-        for feat in resp.get("features", []):
+        from .mapper import map_stac_item
+        for feat in data.get("features", []):
             if remaining is not None and remaining <= 0:
                 return
-            from .mapper import map_stac_item   # reuse tiny mapper colocated below
             yield map_stac_item(feat)
             if remaining is not None:
                 remaining -= 1
 
-        next_href = _extract_next_href(resp.get("links", []))
+        next_href = _extract_next_href(data.get("links", []))
         while next_href and (remaining is None or remaining > 0):
-            page = self.http.get(next_href).json()
+            page_resp = self.http.get(next_href)
+            if page_resp.status_code >= 400:
+                try:
+                    print("[cdse_stac] Pagination error details:\n",
+                          json.dumps(page_resp.json(), indent=2))
+                except Exception:
+                    print("[cdse_stac] Pagination error details (raw):", page_resp.text)
+                raise RuntimeError(
+                    f"CDSE STAC pagination failed: {page_resp.status_code} {page_resp.reason}"
+                )
+            page = page_resp.json()
             for feat in page.get("features", []):
                 if remaining is not None and remaining <= 0:
                     return
-                from .mapper import map_stac_item
                 yield map_stac_item(feat)
                 if remaining is not None:
                     remaining -= 1
             next_href = _extract_next_href(page.get("links", []))
 
     def item(self, item_id: str) -> Optional[Item]:
-        # Many STACs need collection in the path — try the wildcard first
+        from .mapper import map_stac_item
         for candidate in (
             f"{self.base_url}/collections/*/items/{item_id}",
             f"{self.base_url}/items/{item_id}",
         ):
             try:
-                from .mapper import map_stac_item
                 return map_stac_item(self.http.get(candidate).json())
             except Exception:
                 continue
@@ -123,14 +152,15 @@ class CdseStacAdapter(CatalogAdapter):
                 tmp_path = tmp.name
 
             try:
-                # The CDSE asset hrefs may require Authorization too — our HttpClient already carries it.
                 self.http.stream_download(a.href, tmp_path, chunk_size=1024 * 512)
                 dest_key = f"{item.collection}/{item.id}/{filename}"
                 dest_path = self.sink.put(tmp_path, dest_key)
                 a.local_path = dest_path
                 out[actual] = a
             finally:
-                try: os.remove(tmp_path)
-                except OSError: pass
+                try:
+                    os.remove(tmp_path)
+                except OSError:
+                    pass
 
         return out

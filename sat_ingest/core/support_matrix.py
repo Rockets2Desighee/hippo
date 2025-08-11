@@ -131,8 +131,8 @@ from typing import Dict, List, Tuple
 # (satellite, product) -> (primary_adapter, collections)
 SATELLITE_PRODUCTS: Dict[Tuple[str, str], Tuple[str, List[str]]] = {
     # Optical Imaging
-    ("sentinel-2", "L1C"): ("cdse_stac", ["sentinel-2-l1c"]),
-    ("sentinel-2", "L2A"): ("cdse_stac", ["sentinel-2-l2a"]),
+    ("sentinel-2", "L1C"): ("cdse_stac", ["SENTINEL-2-L1C"]),
+    ("sentinel-2", "L2A"): ("cdse_stac", ["SENTINEL-2-L2A"]),
     ("sentinel-3", "OLCI"): ("eumetsat_coda", ["sentinel-3-olci"]),
     ("sentinel-3", "SLSTR"): ("eumetsat_coda", ["sentinel-3-slstr"]),
     ("sentinel-3", "SRAL"): ("eumetsat_coda", ["sentinel-3-sral"]),

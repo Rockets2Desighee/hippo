@@ -1,31 +1,216 @@
 .
+├── data
+│   └── sentinel-2-l2a
+│       ├── quicklook.png
+│       └── S2A_17SNU_20240701_0_L2A
+│           ├── blue.tif
+│           ├── green.tif
+│           ├── quicklook.png
+│           └── red.tif
 ├── env.example
 ├── project.toml
+├── pyproject.toml
+├── README.md
 ├── requirements.txt
 ├── sat_ingest
 │   ├── __init__.py
+│   ├── __pycache__
+│   │   ├── __init__.cpython-313.pyc
+│   │   └── adapter_registry.cpython-313.pyc
+│   ├── adapter_registry.py
 │   ├── adapters
 │   │   ├── __init__.py
+│   │   ├── __pycache__
+│   │   │   └── __init__.cpython-313.pyc
+│   │   ├── airbus_api
+│   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── __init__.cpython-313.pyc
+│   │   │   │   └── client.cpython-313.pyc
+│   │   │   └── client.py
+│   │   ├── asf_vertex
+│   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── __init__.cpython-313.pyc
+│   │   │   │   └── client.cpython-313.pyc
+│   │   │   └── client.py
+│   │   ├── asi_hub
+│   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── __init__.cpython-313.pyc
+│   │   │   │   └── client.cpython-313.pyc
+│   │   │   └── client.py
+│   │   ├── aws_open_data
+│   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── __init__.cpython-313.pyc
+│   │   │   │   └── client.cpython-313.pyc
+│   │   │   └── client.py
+│   │   ├── canadian_gov_api
+│   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── __init__.cpython-313.pyc
+│   │   │   │   └── client.cpython-313.pyc
+│   │   │   └── client.py
+│   │   ├── cdse_stac
+│   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── __init__.cpython-313.pyc
+│   │   │   │   ├── client.cpython-313.pyc
+│   │   │   │   └── token.cpython-313.pyc
+│   │   │   ├── client.py
+│   │   │   ├── mapper.py
+│   │   │   └── token.py
+│   │   ├── dlr_hub
+│   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── __init__.cpython-313.pyc
+│   │   │   │   └── client.cpython-313.pyc
+│   │   │   └── client.py
+│   │   ├── eumetsat_coda
+│   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── __init__.cpython-313.pyc
+│   │   │   │   └── client.cpython-313.pyc
+│   │   │   └── client.py
+│   │   ├── gee
+│   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── __init__.cpython-313.pyc
+│   │   │   │   └── client.cpython-313.pyc
+│   │   │   └── client.py
+│   │   ├── iceye
+│   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── __init__.cpython-313.pyc
+│   │   │   │   └── client.cpython-313.pyc
+│   │   │   └── client.py
+│   │   ├── inpe
+│   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── __init__.cpython-313.pyc
+│   │   │   │   └── client.cpython-313.pyc
+│   │   │   └── client.py
+│   │   ├── jaxa
+│   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── __init__.cpython-313.pyc
+│   │   │   │   └── client.cpython-313.pyc
+│   │   │   └── client.py
+│   │   ├── jma_himawaricast
+│   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── __init__.cpython-313.pyc
+│   │   │   │   └── client.cpython-313.pyc
+│   │   │   └── client.py
+│   │   ├── laads_daac
+│   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── __init__.cpython-313.pyc
+│   │   │   │   └── client.cpython-313.pyc
+│   │   │   └── client.py
+│   │   ├── nasa_ges_disc
+│   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── __init__.cpython-313.pyc
+│   │   │   │   └── client.cpython-313.pyc
+│   │   │   └── client.py
+│   │   ├── noaa_class
+│   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── __init__.cpython-313.pyc
+│   │   │   │   └── client.cpython-313.pyc
+│   │   │   └── client.py
 │   │   ├── noaa_goes
 │   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── __init__.cpython-313.pyc
+│   │   │   │   └── client.cpython-313.pyc
 │   │   │   └── client.py
-│   │   └── stac_generic
+│   │   ├── nsidc
+│   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── __init__.cpython-313.pyc
+│   │   │   │   └── client.cpython-313.pyc
+│   │   │   └── client.py
+│   │   ├── nsidc_daac
+│   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── __init__.cpython-313.pyc
+│   │   │   │   └── client.cpython-313.pyc
+│   │   │   └── client.py
+│   │   ├── planet_api
+│   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── __init__.cpython-313.pyc
+│   │   │   │   └── client.cpython-313.pyc
+│   │   │   └── client.py
+│   │   ├── podaac
+│   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── __init__.cpython-313.pyc
+│   │   │   │   └── client.cpython-313.pyc
+│   │   │   └── client.py
+│   │   ├── s5p_hub
+│   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── __init__.cpython-313.pyc
+│   │   │   │   └── client.cpython-313.pyc
+│   │   │   └── client.py
+│   │   ├── stac_generic
+│   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── __init__.cpython-313.pyc
+│   │   │   │   ├── client.cpython-313.pyc
+│   │   │   │   └── mapper.cpython-313.pyc
+│   │   │   ├── client.py
+│   │   │   └── mapper.py
+│   │   ├── teledyne_si
+│   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── __init__.cpython-313.pyc
+│   │   │   │   └── client.cpython-313.pyc
+│   │   │   └── client.py
+│   │   └── usgs_ee
 │   │       ├── __init__.py
-│   │       ├── client.py
-│   │       └── mapper.py
+│   │       ├── __pycache__
+│   │       │   ├── __init__.cpython-313.pyc
+│   │       │   └── client.cpython-313.pyc
+│   │       └── client.py
 │   ├── cli
 │   │   ├── __init__.py
 │   │   ├── __main__.py
+│   │   ├── __pycache__
+│   │   │   ├── __init__.cpython-313.pyc
+│   │   │   └── __main__.cpython-313.pyc
 │   │   └── commands
 │   │       ├── __init__.py
+│   │       ├── __pycache__
+│   │       │   ├── __init__.cpython-313.pyc
+│   │       │   ├── _fallback.cpython-313.pyc
+│   │       │   ├── download.cpython-313.pyc
+│   │       │   ├── quicklook.cpython-313.pyc
+│   │       │   └── search.cpython-313.pyc
+│   │       ├── _fallback.py
 │   │       ├── download.py
 │   │       ├── quicklook.py
 │   │       └── search.py
 │   ├── core
 │   │   ├── __init__.py
-│   │   ├── adapter_registry.py
+│   │   ├── __pycache__
+│   │   │   ├── __init__.cpython-313.pyc
+│   │   │   ├── adapter_registry.cpython-313.pyc
+│   │   │   ├── auth.cpython-313.pyc
+│   │   │   ├── http.cpython-313.pyc
+│   │   │   ├── models.cpython-313.pyc
+│   │   │   ├── search.cpython-313.pyc
+│   │   │   ├── support_matrix.cpython-313.pyc
+│   │   │   └── utils.cpython-313.pyc
 │   │   ├── adapters
 │   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── __init__.cpython-313.pyc
+│   │   │   │   └── base.cpython-313.pyc
 │   │   │   └── base.py
 │   │   ├── auth.py
 │   │   ├── geometry.py
@@ -35,6 +220,10 @@
 │   │   ├── search.py
 │   │   ├── storage
 │   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── __init__.cpython-313.pyc
+│   │   │   │   ├── base.cpython-313.pyc
+│   │   │   │   └── local.cpython-313.pyc
 │   │   │   ├── base.py
 │   │   │   └── local.py
 │   │   ├── support_matrix.py
@@ -42,7 +231,17 @@
 │   │   └── utils.py
 │   └── utils
 │       ├── __init__.py
+│       ├── __pycache__
+│       │   ├── __init__.cpython-313.pyc
+│       │   └── geometry.cpython-313.pyc
 │       └── geometry.py
+├── sat_ingest.egg-info
+│   ├── dependency_links.txt
+│   ├── entry_points.txt
+│   ├── PKG-INFO
+│   ├── requires.txt
+│   ├── SOURCES.txt
+│   └── top_level.txt
 ├── structure.txt
 ├── test_aoi_big
 │   ├── aoi.dbf
@@ -59,4 +258,4 @@
         ├── __init__.py
         └── sample_aoi.geojson
 
-15 directories, 45 files
+75 directories, 184 files
